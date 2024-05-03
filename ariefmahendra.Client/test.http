@@ -1,0 +1,2 @@
+DELETE http://localhost:5048/api/v1/products/8b38dfe1-c02f-4c5f-c944-08dc6a7a0c92
+Accept: application/json

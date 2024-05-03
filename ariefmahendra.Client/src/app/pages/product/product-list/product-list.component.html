@@ -1,0 +1,22 @@
+<table class="table table-hover">
+  <thead>
+  <tr>
+    <th scope="col">Nama</th>
+    <th scope="col">kode</th>
+    <th scope="col">Harga</th>
+    <th scope="col">Stok</th>
+    <th scope="col">Aksi</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr  *ngFor="let product of products">
+    <td>{{ product.productName }}</td>
+    <td>{{ product.productCode }}</td>
+    <td>{{product.productPrice }}</td>
+    <td>{{ product.stock }}</td>
+    <td>
+      <button class="btn btn-danger" (click)="onDeleteProduct(product.id)">Delete</button>
+    </td>
+  </tr>
+  </tbody>
+</table>
