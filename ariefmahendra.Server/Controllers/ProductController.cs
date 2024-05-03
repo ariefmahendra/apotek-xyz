@@ -67,7 +67,7 @@ public class ProductController: ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("id")]
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProductById([FromBody] Product payload, string id)
     {
         var product = new Product()

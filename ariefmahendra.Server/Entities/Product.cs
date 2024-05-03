@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 
 namespace ariefmahendra.Entities;
@@ -7,6 +8,8 @@ namespace ariefmahendra.Entities;
 [Table("mst_product")]
 public class Product
 {
+    
+    [JsonIgnore]
     [Key, Column("id")]
     public Guid Id { get; set; }
 

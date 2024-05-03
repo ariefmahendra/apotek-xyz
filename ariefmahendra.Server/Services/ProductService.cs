@@ -1,6 +1,8 @@
-﻿using ariefmahendra.Entities;
+﻿using ariefmahendra.Dtos;
+using ariefmahendra.Entities;
 using ariefmahendra.Repositories;
 using ariefmahendra.Utils.CustomException;
+using ariefmahendra.Utils.MapObject;
 
 namespace ariefmahendra.Services;
 
@@ -15,14 +17,14 @@ public class ProductService : IProductService
         _repository = repository;
     }
 
-    public async Task<Product> Create(Product payload)
+    public async Task<ProductResponse> Create(Product payload)
     {
         var product = await _repository.SaveAsync(payload);
         await _persistence.SaveChangesAsync();
-        return product;
+        return Map.MapProductResponse(product);
     }
 
-    public async Task<Product> GetById(string? id)
+    public async Task<ProductResponse> GetById(string? id)
     {
         var product = await _repository.FindByIdAsync(Guid.Parse(id));
         if (product == null)
@@ -30,25 +32,30 @@ public class ProductService : IProductService
             throw new NotFoundException("Product Not Found");
         }
 
-        return product;
+        return Map.MapProductResponse(product);
     }
 
-    public async Task<List<Product>> GetAll()
+    public async Task<List<ProductResponse>> GetAll()
     {
-        return await _repository.FindAllAsync();
+        var products = await _repository.FindAllAsync();
+        return products.Select(Map.MapProductResponse).ToList();
     }
 
-    public async Task<Product> Update(Product payload)
+    public async Task<ProductResponse> Update(Product payload)
     {
         var product = _repository.Update(payload);
         await _persistence.SaveChangesAsync();
-        return product;
+        return Map.MapProductResponse(product);
     }
 
     public async Task DeleteById(string? id)
     {
-        var byId = await GetById(id);
-        _repository.Delete(byId);
+        var product = await _repository.FindByIdAsync(Guid.Parse(id));
+        if (product == null)
+        {
+            throw new NotFoundException("Product Not Found");
+        }
+        _repository.Delete(product);
         await _persistence.SaveChangesAsync();
     }
 }

@@ -53,8 +53,8 @@ export class ProductService {
       );
   }
 
-  public updateProduct(product: Product): Observable<ApiResponse<Product>>{
-    return this.http.put<ApiResponse<Product>>( this.baseurl + CodeService.UPDATE_PRODUCT + `{id}`, product)
+  public updateProduct(product: Product, id: string): Observable<ApiResponse<Product>>{
+    return this.http.put<ApiResponse<Product>>( this.baseurl + CodeService.UPDATE_PRODUCT + id, product)
       .pipe(
         catchError((err: Error) => {
           throw err;

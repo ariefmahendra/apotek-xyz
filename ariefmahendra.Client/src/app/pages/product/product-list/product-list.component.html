@@ -15,7 +15,8 @@
     <td>{{product.productPrice }}</td>
     <td>{{ product.stock }}</td>
     <td>
-      <button class="btn btn-danger" (click)="onDeleteProduct(product.id)">Delete</button>
+      <button type="button" class="btn btn-primary btn-sm" (click)="onUpdate(product.id)">Update</button>
+      <button type="button" class="btn btn-danger btn-sm mx-1" (click)="onDeleteProduct(product.id)">Delete</button>
     </td>
   </tr>
   </tbody>

@@ -44,6 +44,7 @@
     >
   </div>
   <button type="submit" class="btn btn-primary mt-3">Add</button>
+  <button type="button" (click)="onUpdate()"  [disabled]="!isUpdated" class="btn btn-primary mt-3 mx-1">Update</button>
 </form>
 <div
   class="alert mt-3"

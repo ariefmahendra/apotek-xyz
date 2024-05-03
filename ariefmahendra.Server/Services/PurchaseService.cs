@@ -10,31 +10,24 @@ public class PurchaseService: IPurchaseService
 {
 
     private readonly IPersistence _persistence;
-    private readonly IRepository<Purchase> _repository;
+    private readonly IRepository<Purchase> _purchaseRepository;
     private readonly IProductService _productService;
-
-    public PurchaseService(IPersistence persistence, IRepository<Purchase> repository, IProductService productService)
+    
+    public PurchaseService(IPersistence persistence, IRepository<Purchase> purchaseRepository, IProductService productService)
     {
         _persistence = persistence;
-        _repository = repository;
+        _purchaseRepository = purchaseRepository;
         _productService = productService;
     }
 
     public async Task<PurchaseResponse> CreateNewTransaction(Purchase payload)
     {
-        /*
-         * masukkin si purchase
-         * cari produk
-         * masukkin ke dalam purchase detail
-         * hitung total transactionnya dan update nilai total transaction
-         * return hasilnya
-         */
 
         await _persistence.BeginTransaction();
         try
         {
             // save purchase
-            var purchase = await _repository.SaveAsync(payload);
+            var purchase = await _purchaseRepository.SaveAsync(payload);
             await _persistence.SaveChangesAsync();
 
             // store total transaction and purchase detail response
@@ -48,18 +41,20 @@ public class PurchaseService: IPurchaseService
                     purchaseDetail.PurchaseId = purchase.Id;
                     
                     // get product is present / else throw exception not found
-                    var productById = await _productService.GetById(Convert.ToString(purchaseDetail.ProductId));
-                    
+                    var productById = await _productService.GetById(purchaseDetail.ProductId.ToString());
+
+                    var productEntity = Map.MapProductEntity(productById);
+
                     // update stock product id
                     productById.Stock -= purchaseDetail.Quantity;
-                    var productUpdated = await _productService.Update(productById);
+                    var productUpdated = await _productService.Update(productEntity);
                     await _persistence.SaveChangesAsync();
                         
                     // store purchase detail to purchase detail response
                     purchaseDetails.Add(new PurchaseDetailResponse()
                     {
                         Id = purchaseDetail.Id.ToString(),
-                        Product = productUpdated,
+                        Product = Map.MapProductEntity(productUpdated),
                         Quantity = purchaseDetail.Quantity
                     });
                     
@@ -72,7 +67,7 @@ public class PurchaseService: IPurchaseService
 
             // update total transaction on purchase
             purchase.Total = totalTransaction;
-            _repository.Update(purchase);
+            _purchaseRepository.Update(purchase);
             await _persistence.SaveChangesAsync();
             
             // commit transaction

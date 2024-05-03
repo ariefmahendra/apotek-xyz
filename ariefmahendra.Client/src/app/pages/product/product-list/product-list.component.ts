@@ -4,6 +4,7 @@ import {ProductService} from "../service/product.service";
 import {ApiResponse} from "../../../shared/model/response.model";
 import {CommonService} from "../../../shared/service/common.service";
 import {Subscription} from "rxjs";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-product-list',
@@ -16,7 +17,8 @@ export class ProductListComponent implements OnInit{
 
   constructor(
     private readonly productService: ProductService,
-    private readonly commonService: CommonService
+    private readonly commonService: CommonService,
+    private readonly router: Router
   ) {
   }
 
@@ -50,5 +52,9 @@ export class ProductListComponent implements OnInit{
           this.ngOnInit();
         })
       });
+  }
+
+  onUpdate(id: string): void {
+    this.router.navigateByUrl('product/' + id);
   }
 }
