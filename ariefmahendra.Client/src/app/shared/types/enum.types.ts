@@ -4,4 +4,6 @@ export enum CodeService {
   GET_PRODUCT_BY_ID = 'api/v1/products/',
   DELETE_PRODUCT = 'api/v1/products/',
   UPDATE_PRODUCT = 'api/v1/products/',
+
+  CREATE_TRANSACTION = 'api/v1/transactions'
 }

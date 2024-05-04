@@ -1,5 +1,4 @@
 ﻿using ariefmahendra.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ariefmahendra.Dtos;
 

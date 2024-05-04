@@ -1,0 +1,74 @@
+<table class="table table-hover mb-2">
+    <thead>
+    <tr>
+      <th scope="col">BarangID</th>
+      <th scope="col">Nama</th>
+      <th scope="col">Jmlh Beli</th>
+      <th scope="col">Sub Total</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let product of productListTx">
+      <td>{{product.productCode}}</td>
+      <td>{{product.productName}}</td>
+      <td>{{product.quantity}}</td>
+      <td>{{product.subTotal}}</td>
+    </tr>
+    </tbody>
+</table>
+<div class="d-flex flex-row justify-content-end mb-2">
+  <button
+    class="btn btn-danger"
+    (click)="clear()"
+  >
+    Clear All
+  </button>
+</div>
+
+<form [formGroup]="calculateForm">
+  <div class="d-flex flex-row justify-content-between">
+    <div>
+      <h4>Perhatikan !</h4>
+      <p>Barang yang sudah dibeli, tidak dapat ditukar atau dikembalikan</p>
+    </div>
+    <div>
+      <div class="input-group flex-nowrap mb-2">
+      <span class="input-group-text" >Total</span>
+      <input
+      class="form-control"
+      type="number"
+      value="30000"
+      formControlName="total"
+      disabled
+      >
+    </div>
+    <div class="input-group flex-nowrap mb-2">
+      <span class="input-group-text">Jml Uang</span>
+      <input
+      class="form-control"
+      type="number"
+      value="50000"
+      [(ngModel)]="cash"
+      (ngModelChange)=" change()"
+      formControlName="cash"
+      >
+    </div>
+    <div class="input-group flex-nowrap mb-2">
+      <span class="input-group-text">Kembali</span>
+      <input
+        class="form-control"
+        type="number"
+        value="20000"
+        formControlName="kembalian"
+        disabled
+      >
+    </div>
+  </div>
+</div>
+
+<div class="d-flex flex-row justify-content-between mb-5">
+  <button class="btn btn-primary">Exit</button>
+  <button class="btn btn-primary">Save</button>
+</div>
+</form>
+

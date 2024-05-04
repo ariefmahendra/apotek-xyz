@@ -17,4 +17,9 @@ export class CommonService {
   getUpdate(): Observable<any> {
     return this.subjectName.asObservable();
   }
+
+  generateInvoiceNumber(): string {
+    const randValue = Math.floor(100000 + Math.random() * 900000).toString();
+    return `INV-${randValue}`
+  }
 }

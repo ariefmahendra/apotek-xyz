@@ -1,0 +1,84 @@
+
+<form class="mb-3" [formGroup]="transactionProductForm" (ngSubmit)="onAddProduct()">
+  <div
+    class="d-flex flex-row mb-2 justify-content-between"
+  >
+    <div>
+      <label for="productCode" class="form-label">Kode Barang</label>
+      <select
+        id="productCode"
+        class="form-select"
+        (change)="onSelectedProduct($event.target.value)"
+      >
+        <option default>Kode</option>
+        <option
+          *ngFor="let product of listProduct"
+        >
+          {{product.productCode}}
+        </option>
+      </select>
+    </div>
+    <div>
+      <label for="productName" class="form-label">Nama Barang</label>
+      <input
+        id="productName"
+        class="form-control"
+        type="text"
+        value="Nama Barang"
+        formControlName="productName"
+      >
+    </div>
+    <div>
+      <label for="productPrice" class="form-label">Harga Satuan</label>
+      <input
+        id="productPrice"
+        class="form-control"
+        type="number"
+        value="0"
+        aria-label="readonly input example"
+        formControlName="productPrice"
+      >
+    </div>
+    <div>
+      <label for="quantity" class="form-label">Jml Beli</label>
+      <input
+        id="quantity"
+        class="form-control"
+        type="number"
+        formControlName="quantity"
+        [(ngModel)]="quantityBuy"
+        (ngModelChange)="onChangeQuantity()"
+        required
+      >
+    </div>
+    <div>
+      <label for="total" class="form-label">Sub Total</label>
+      <input
+        id="total"
+        class="form-control"
+        type="number"
+        value="0"
+        formControlName="total"
+      >
+    </div>
+  </div>
+  <div class="d-flex flex-row justify-content-end">
+    <button
+      class="btn btn-primary mx-2"
+      type="reset"
+      id="cancel"
+    >
+      Cancel
+    </button>
+    <button
+      class="btn btn-primary"
+      type="submit"
+      id="add"
+    >
+      Add
+    </button>
+  </div>
+</form>
+<div class="alert alert-danger" role="alert" *ngIf="alertIsShow">
+  {{message}}
+</div>

@@ -24,4 +24,10 @@ public class Product
 
     [Column("stock")]
     public int Stock { get; set; }
+
+    public override string ToString()
+    {
+        return
+            $"{nameof(Id)}: {Id}, {nameof(ProductName)}: {ProductName}, {nameof(ProductCode)}: {ProductCode}, {nameof(ProductPrice)}: {ProductPrice}, {nameof(Stock)}: {Stock}";
+    }
 }

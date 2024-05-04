@@ -15,7 +15,7 @@ public class Purchase
     public string NoInvoice { get; set; }
     
     [Column("transaction_date")]
-    public DateTime TransactionDate { get; set; }
+    public string TransactionDate { get; set; }
 
     [JsonIgnore]
     [Column("total")]
