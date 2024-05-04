@@ -35,6 +35,16 @@ public class ProductService : IProductService
         return Map.MapProductResponse(product);
     }
 
+    public async Task<ProductResponse> GetByProductCode(string productCode)
+    {
+        var product = await _repository.FindAsync(product => product.ProductCode == productCode);
+        if (product == null)
+        {
+            throw new NotFoundException("product not found");
+        }
+        return Map.MapProductResponse(product);
+    }
+
     public async Task<List<ProductResponse>> GetAll()
     {
         var products = await _repository.FindAllAsync();

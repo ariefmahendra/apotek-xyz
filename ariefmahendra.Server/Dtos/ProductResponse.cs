@@ -7,4 +7,6 @@ public class ProductResponse
     public string ProductCode { get; set; }
     public long ProductPrice { get; set; }
     public int Stock { get; set; }
+
+   
 }

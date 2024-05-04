@@ -7,6 +7,7 @@ public interface IProductService
 {
     Task<ProductResponse> Create(Product payload);
     Task<ProductResponse> GetById(string? id);
+    Task<ProductResponse> GetByProductCode(string productCode);
     Task<List<ProductResponse>> GetAll();
     Task<ProductResponse> Update(Product payload);
     Task DeleteById(string? id);

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 
 namespace ariefmahendra.Repositories;
@@ -28,6 +29,11 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     public async Task<TEntity?> FindByIdAsync(Guid id)
     {
         return await _applicationDbContext.Set<TEntity>().FindAsync(id);
+    }
+
+    public async Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> criteria)
+    {
+        return await _applicationDbContext.Set<TEntity>().FirstOrDefaultAsync(criteria);
     }
 
     public async Task<List<TEntity>> FindAllAsync()

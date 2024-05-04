@@ -11,13 +11,13 @@ public class PurchaseService: IPurchaseService
 
     private readonly IPersistence _persistence;
     private readonly IRepository<Purchase> _purchaseRepository;
-    private readonly IProductService _productService;
-    
-    public PurchaseService(IPersistence persistence, IRepository<Purchase> purchaseRepository, IProductService productService)
+    private readonly IRepository<Product> _ProductRepository;
+
+    public PurchaseService(IPersistence persistence, IRepository<Purchase> purchaseRepository, IRepository<Product> productRepository)
     {
         _persistence = persistence;
         _purchaseRepository = purchaseRepository;
-        _productService = productService;
+        _ProductRepository = productRepository;
     }
 
     public async Task<PurchaseResponse> CreateNewTransaction(Purchase payload)
@@ -41,20 +41,36 @@ public class PurchaseService: IPurchaseService
                     purchaseDetail.PurchaseId = purchase.Id;
                     
                     // get product is present / else throw exception not found
-                    var productById = await _productService.GetById(purchaseDetail.ProductId.ToString());
-
-                    var productEntity = Map.MapProductEntity(productById);
-
-                    // update stock product id
-                    productById.Stock -= purchaseDetail.Quantity;
-                    var productUpdated = await _productService.Update(productEntity);
+                    var productById = await _ProductRepository.FindByIdAsync(purchaseDetail.ProductId);
+                    
+                    // throw exception not found
+                    if (productById == null)
+                    {
+                        throw new NotFoundException("product not found");
+                    } ;
+                    
+                    // check stock must be greater than quantity
+                    if (productById.Stock < purchaseDetail.Quantity)
+                    {
+                        throw new Exception("quantity not valid");
+                    }
+                    
+                    
+                    // update stock product
+                    var productUpdated = _ProductRepository.Update(productById);
                     await _persistence.SaveChangesAsync();
+
+
+                    if (productUpdated == null)
+                    {
+                        throw new Exception("failed updated product");
+                    }
                         
                     // store purchase detail to purchase detail response
                     purchaseDetails.Add(new PurchaseDetailResponse()
                     {
                         Id = purchaseDetail.Id.ToString(),
-                        Product = Map.MapProductEntity(productUpdated),
+                        Product = productUpdated,
                         Quantity = purchaseDetail.Quantity
                     });
                     
@@ -85,7 +101,7 @@ public class PurchaseService: IPurchaseService
         catch (Exception e)
         {
             await _persistence.Rollback();
-            throw new Exception("failed create new transaction : " + e.InnerException.Message);
+            throw new Exception("failed create new transaction");
         }
     }
 }

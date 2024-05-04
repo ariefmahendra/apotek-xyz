@@ -60,11 +60,30 @@ public class ProductController: ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllProduct()
+    public async Task<IActionResult> GetAllProduct([FromQuery(Name = "code")] string? productCode)
     {
-        var products = await _productService.GetAll();
-        var response = Map.MapToResponse(HttpStatusCode.OK, "success get all product", products);
-        return Ok(response);
+        try
+        {
+            if (productCode != null)
+            {
+                var byProductCode = await _productService.GetByProductCode(productCode);
+                return Ok(Map.MapToResponse(HttpStatusCode.OK, "success get product by product code", byProductCode));
+            }
+
+            var products = await _productService.GetAll(); var response = Map.MapToResponse(HttpStatusCode.OK, "success get all product", products);
+            return Ok(response);
+            
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(Map.MapToResponse(HttpStatusCode.NotFound, "product not found", null));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Error : " + e.Message);
+            return StatusCode(500,
+                Map.MapToResponse(HttpStatusCode.InternalServerError, "error while update product", null));
+        }     
     }
 
     [HttpPut("{id}")]
@@ -115,5 +134,4 @@ public class ProductController: ControllerBase
                 Map.MapToResponse(HttpStatusCode.InternalServerError, "error while update product", null));
         }       
     }
-    
 }
