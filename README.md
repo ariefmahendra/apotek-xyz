@@ -17,6 +17,9 @@ $ npm install
 $ npm run build
 ```
 
+## File backup Database
+[File Backup Microsoft SQL Server](database/apotek_db_backup)
+
 ### Link Aplikasi
 - Server : http://localhost:5048
 - Client : http://localhost:4200
@@ -36,4 +39,4 @@ $ npm run build
 ### Menu Master Produk
 ![master-product.png](assets/master-product.png)
 
-## Thank You for using Apotek XYZ
+## Terimakasih
