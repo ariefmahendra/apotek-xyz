@@ -9,6 +9,7 @@ import {environment} from "../../../../environments/environment.development";
 import { Product } from '../../product/models/product';
 import { TransactionHeader } from '../model/transaction-header.model';
 import { TransactionProductForm } from '../model/transaction-product-form.model';
+import { TransactionDetails } from '../model/transaction-detail-request.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,14 +21,28 @@ export class TransactionService {
   private _transactionHeader: TransactionHeader;
   private _listProductTx: TransactionProductForm[] = [];
   private _totalTransactionPrice: number = 0;
+  private _transationRequest: TransactionRequestModel;
+  private _transactionDetail: TransactionDetails[] = [];
   
-
   constructor(
     private readonly http: HttpClient
   ) { }
 
-  createTransaction(payload: TransactionRequestModel): Observable<ApiResponse<Transaction>>{
-    return this.http.post<ApiResponse<Transaction>>(this._baseUrl + CodeService.CREATE_TRANSACTION, payload);
+  createTransaction(): Observable<ApiResponse<Transaction>>{
+    this._listProductTx.forEach((product) => {
+      this._transactionDetail.push({
+        productId: product.id,
+        quantity: product.quantity
+      })
+    })
+
+    this._transationRequest = {
+      noInvoice: this._transactionHeader.noInvoice,
+      transactionDate: this._transactionHeader.invoiceDate,
+      purchaseDetails: this._transactionDetail
+    }
+
+    return this.http.post<ApiResponse<Transaction>>(this._baseUrl + CodeService.CREATE_TRANSACTION, this._transationRequest);
   }
 
   addProduct(product: Product): void{
@@ -61,6 +76,10 @@ export class TransactionService {
 
   getTotalTransactionPrice(): number{
     return this._totalTransactionPrice
+  }
+
+  clearTotalTranscationPrice(): void{
+    this._totalTransactionPrice = 0
   }
 
 }

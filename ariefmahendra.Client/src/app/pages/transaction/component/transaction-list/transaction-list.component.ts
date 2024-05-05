@@ -3,6 +3,7 @@ import { TransactionService } from '../../service/transaction.service';
 import { TransactionProductForm } from '../../model/transaction-product-form.model';
 import { CommonService } from '../../../../shared/service/common.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-transaction-list',
@@ -12,7 +13,6 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 export class TransactionListComponent implements OnInit {
 
   productListTx: TransactionProductForm[] = [];
-  cash: number;
   totalPrice: number;
 
   constructor(
@@ -23,7 +23,7 @@ export class TransactionListComponent implements OnInit {
   calculateForm: FormGroup = new FormGroup ({
     total: new FormControl({value: null, disabled: true }, [Validators.required]),
     cash: new FormControl({value: null, disabled: false }, [Validators.required]),
-    kembalian: new FormControl({value: null, disabled: true }, [Validators.required]),
+    returnCash: new FormControl({value: null, disabled: true }, [Validators.required]),
   })
 
   ngOnInit(): void {
@@ -41,6 +41,8 @@ export class TransactionListComponent implements OnInit {
   }
 
   clear(): void {
+    this.totalPrice = 0;
+    this.txService.clearTotalTranscationPrice();
     this.productListTx = [];
     this.txService.clearProductTx();
     this.calculateForm.reset();
@@ -54,10 +56,40 @@ export class TransactionListComponent implements OnInit {
   }
 
   change(): void{
+    let returnCash = this.calculateForm.value.cash - this.txService.getTotalTransactionPrice();
+    if (returnCash < 0) {
+      returnCash = 0;
+    }
+    
     this.calculateForm.patchValue({
-      cash: this.cash,
-      kembalian: this.txService.getTotalTransactionPrice() - this.cash
+      returnCash: returnCash 
     })
+  }
+
+  creteNewTransaction(): void {
+    if (this.productListTx.length == 0) {
+      this.txService.clearTotalTranscationPrice();
+      return alert("tidak ada transaksi yang dibuat, silahkan tambahkan transaksi terlebih dahulu");
+    }
+
+    if (this.calculateForm.invalid) {
+      this.txService.clearTotalTranscationPrice();
+      return alert("gagal membuat transaksi, silahkan bayar transaksi terlebih dahulu");
+    }
+
+    this.txService.createTransaction()
+      .subscribe({
+        next: () => {
+          alert("sukses membuat transaksi");
+          this.clear();
+          this.txService.clearTotalTranscationPrice();
+        }, 
+        error: (err: HttpErrorResponse) => {                 
+          alert(err.error.message);
+          this.clear();
+          this.txService.clearTotalTranscationPrice();
+        }
+      })
   }
 
 }

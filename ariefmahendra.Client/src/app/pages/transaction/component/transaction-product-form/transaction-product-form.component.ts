@@ -15,11 +15,11 @@ export class TransactionProductFormComponent implements OnInit {
   
   isDisabled: boolean =  true;
   listProduct: Product[] = [];
-  selectedProduct: Product = this.listProduct[0];
+  selectedProduct: Product;
   listProductAdded: Product[] =[];
   alertIsShow: boolean = false;
   message: string = '';
-  quantityBuy: number;
+  btnIsShow: boolean = true;
   
   constructor(
     private readonly productService: ProductService,
@@ -34,7 +34,7 @@ export class TransactionProductFormComponent implements OnInit {
   transactionProductForm: FormGroup = new FormGroup({
     productName: new FormControl({value: '', disabled: this.isDisabled }, [Validators.required]),
     productPrice: new FormControl({value: null, disabled: this.isDisabled }, [Validators.required]),
-    quantity: new FormControl({value: null, disabled: false }, [Validators.required]),
+    quantity: new FormControl({value: null, disabled: false }, [Validators.required,  Validators.pattern("^[0-9]*$"), Validators.min(1)]),
     total: new FormControl({value: null, disabled: this.isDisabled }, [Validators.required]),
   })
 
@@ -43,7 +43,7 @@ export class TransactionProductFormComponent implements OnInit {
       this.txService.addProduct(this.selectedProduct);
       this.txService.addProductTx(
         {
-          id: this.selectedProduct.productCode,
+          id: this.selectedProduct.id,
           productName: this.selectedProduct.productName,
           productCode: this.selectedProduct.productCode,
           productPrice: this.selectedProduct.productPrice,
@@ -82,8 +82,23 @@ export class TransactionProductFormComponent implements OnInit {
   }
 
   onChangeQuantity(): void {
-    this.transactionProductForm.patchValue({
-      total: this.quantityBuy * this.selectedProduct.productPrice
-    })
+    if (this.selectedProduct) {
+      this.transactionProductForm.patchValue({
+        total: this.transactionProductForm.value.quantity * this.selectedProduct.productPrice
+      });
+
+      if (this.selectedProduct.stock < this.transactionProductForm.value.quantity) {
+        this.message = "gagal membuat transaksi, stok tidak mencukupi"
+        this.alertIsShow = true;
+        this.btnIsShow = false;
+      } else if (!this.transactionProductForm.valid) {
+        this.message = "gagal membuat transaksi, input tidak valid"
+        this.alertIsShow = true;
+        this.btnIsShow = false;
+      } else {
+        this.alertIsShow = false;
+        this.btnIsShow = true;
+      }
+    }
   }
 }

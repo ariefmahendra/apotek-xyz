@@ -1,5 +1,5 @@
 export interface TransactionHeader {
     noInvoice: string;
-    invoiceDate: number;
+    invoiceDate: string;
     operator: string;
 }

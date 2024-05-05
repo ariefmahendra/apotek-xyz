@@ -12,7 +12,7 @@ import { CommonService } from './../../../../shared/service/common.service';
 export class TransactionHeaderComponent implements OnInit{
 
   isDisabled: boolean =  true;
-  date: number;
+  date: string;
 
   constructor(
     private readonly txService: TransactionService,
@@ -33,7 +33,7 @@ export class TransactionHeaderComponent implements OnInit{
 
   sendTransactionHeader(): void {
     this.txService.sendTransactionHeader({
-      invoiceDate: this.date = Date.now(),
+      invoiceDate: this.date = Date.now().toString(),
       noInvoice: this.transactionForm.value.noInvoice,
       operator: this.transactionForm.value.operator
     });

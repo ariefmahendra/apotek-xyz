@@ -11,12 +11,14 @@ public class PurchaseService: IPurchaseService
 
     private readonly IPersistence _persistence;
     private readonly IRepository<Purchase> _purchaseRepository;
+    private readonly IRepository<PurchaseDetail> _PurchaseDetailRepository;
     private readonly IRepository<Product> _ProductRepository;
 
-    public PurchaseService(IPersistence persistence, IRepository<Purchase> purchaseRepository, IRepository<Product> productRepository)
+    public PurchaseService(IPersistence persistence, IRepository<Purchase> purchaseRepository, IRepository<PurchaseDetail> purchaseDetailRepository, IRepository<Product> productRepository)
     {
         _persistence = persistence;
         _purchaseRepository = purchaseRepository;
+        _PurchaseDetailRepository = purchaseDetailRepository;
         _ProductRepository = productRepository;
     }
 
@@ -26,88 +28,87 @@ public class PurchaseService: IPurchaseService
         await _persistence.BeginTransaction();
         try
         {
-            // save purchase
-            var purchase = await _purchaseRepository.SaveAsync(payload);
-            await _persistence.SaveChangesAsync();
-
-            // store total transaction and purchase detail response
-            var purchaseDetails = new List<PurchaseDetailResponse>();
             long totalTransaction = 0;
 
             if (payload.PurchaseDetails == null)
             {
-                throw new Exception("must be set instance of purchase detail");
+                throw new BadRequestException("must be set instance of purchase detail");
             }
-            
+
+            var productList = new List<Product>();
             foreach (var purchaseDetail in payload.PurchaseDetails)
             {
-                // set purchase detail to reference purchase id 
-                purchaseDetail.PurchaseId = purchase.Id;
-                    
                 // get product is present / else throw exception not found
                 var productById = await _ProductRepository.FindByIdAsync(purchaseDetail.ProductId);
 
                 if (productById == null)
                 {
-                    throw new Exception("product not found");
+                    throw new NotFoundException("product not found");
                 }
                 
                 // update stock product
-                if (productById.Stock >= purchaseDetail.Quantity)
+                if (purchaseDetail.Quantity > productById.Stock)
                 {
-                    productById.Stock -= purchaseDetail.Quantity;
+                    throw new BadRequestException("quantity not valid");
                 }
-                else
-                {
-                    throw new Exception("quantity not valid");
-                }
-                
                 
                 var productUpdated = _ProductRepository.Update(productById);
                 await _persistence.SaveChangesAsync();
 
-                if (productUpdated == null)
-                {
-                    throw new Exception("failed updated product");
-                }
+                var product = productUpdated ?? throw new Exception("failed updated product");
                 
-                Console.WriteLine(productUpdated);
-                // store purchase detail to purchase detail response
-                purchaseDetails.Add(new PurchaseDetailResponse()
-                { 
-                    Id = purchaseDetail.Id.ToString(), 
-                    Product = productById, 
-                    Quantity = purchaseDetail.Quantity
-                });
+                // add product to collection
+                productList.Add(product);
                     
-                if (productById.Stock <= 0)
-                { 
-                    throw new Exception("stock empty");
-                } 
                 totalTransaction += productById.ProductPrice * purchaseDetail.Quantity;
             }
 
-            // update total transaction on purchase
-            purchase.Total = totalTransaction;
-            _purchaseRepository.Update(purchase);
+            // save purchase
+            payload.Total = totalTransaction;
+            var purchase = await _purchaseRepository.SaveAsync(payload);
             await _persistence.SaveChangesAsync();
+
+            var i = 0;
+            var j = 0;
+            var purchaseDetailResponse = new List<PurchaseDetailResponse>();
+            
+            while (i < productList.Count() -1 && j < payload.PurchaseDetails.Count() -1)
+            {
+                var purchaseDetailEntity = await _PurchaseDetailRepository.SaveAsync(new PurchaseDetail()
+                {
+                    PurchaseId = purchase.Id,
+                    ProductId = productList[i].Id,
+                    Quantity = payload.PurchaseDetails[j].Quantity
+                });
+                await _persistence.SaveChangesAsync();
+                i++;
+                j++;
+
+                purchaseDetailResponse.Add(new PurchaseDetailResponse()
+                {
+                    Id = purchaseDetailEntity.Id.ToString(),
+                    Product = productList[i],
+                    Quantity = payload.PurchaseDetails[j].Quantity
+                });
+            }
+
             
             // commit transaction
             await _persistence.Commit();
-
+            
             return new PurchaseResponse()
             {
                 Id = purchase.Id.ToString(),
                 TransactionDate = purchase.TransactionDate,
                 Total = purchase.Total,
                 NoInvoice = purchase.NoInvoice,
-                PurchaseDetailResponses = purchaseDetails,
+                PurchaseDetailResponses = purchaseDetailResponse,
             };
         }
         catch (Exception e)
         {
             await _persistence.Rollback();
-            throw new Exception("failed create new transaction : " + e.InnerException.Message);
+            throw new Exception(e.Message);
         }
     }
 }
